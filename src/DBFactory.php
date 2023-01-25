@@ -57,7 +57,7 @@ class DBFactory
         }
 
         if ($handle instanceof Client){
-            return new RedisRepository($handle);
+            return new RedisRepository($handle,$_SERVER['SERVER_NAME']);
         }
 
         return false;

@@ -11,7 +11,7 @@ use Predis\Collection\Iterator\HashKey;
  */
 class RedisRepository implements Repository
 {
-    const REDIS_KEY = 'VISITORS';
+    protected $redis_key;
 
     /** @var Client */
     private $db = null;
@@ -20,9 +20,10 @@ class RedisRepository implements Repository
      * RedisRepository constructor.
      * @param $db
      */
-    public function __construct($db)
+    public function __construct($db,$redis_key = 'VISITORS')
     {
         $this->db  = $db;
+        $this->redis_key = $redis_key;
     }
 
     /**
@@ -31,7 +32,7 @@ class RedisRepository implements Repository
      */
     public function getVisitorBySessionID($sessionId)
     {
-        return $this->db->hget(self::REDIS_KEY, $sessionId);
+        return $this->db->hget($this->redis_key, $sessionId);
     }
 
     /**
@@ -41,7 +42,7 @@ class RedisRepository implements Repository
      */
     public function addNewVisitor($sessionId, $time)
     {
-        return $this->db->hset(self::REDIS_KEY, $sessionId, $time);
+        return $this->db->hset($this->redis_key, $sessionId, $time);
     }
 
     /**
@@ -51,7 +52,7 @@ class RedisRepository implements Repository
      */
     public function updateVisitor($sessionId, $time)
     {
-        return $this->db->hset(self::REDIS_KEY, $sessionId, $time);
+        return $this->db->hset($this->redis_key, $sessionId, $time);
     }
 
     /**
@@ -61,7 +62,7 @@ class RedisRepository implements Repository
     public function deleteOfflineVisitors($time)
     {
         $fields = [];
-        $it = new HashKey($this->db, self::REDIS_KEY);
+        $it = new HashKey($this->db, $this->redis_key);
         foreach($it as $sessionId => $value){
             if ($value < $time){
                 $fields[] = $sessionId;
@@ -70,7 +71,7 @@ class RedisRepository implements Repository
 
         if (!empty($fields))
         {
-            $this->db->hdel(self::REDIS_KEY, $fields);
+            $this->db->hdel($this->redis_key, $fields);
         }
 
         return true;
@@ -81,7 +82,7 @@ class RedisRepository implements Repository
      */
     public function getAllVisitors()
     {
-        return $this->db->hgetall(self::REDIS_KEY);
+        return $this->db->hgetall($this->redis_key);
     }
 
     public function close()
