@@ -48,16 +48,17 @@ class DBFactory
 
     /**
      * @param PDO|mixed $handle
+     * @param string $redisKey
      * @return PDORepository|RedisRepository
      */
-    public function getRepository($handle)
+    public function getRepository($handle,$redisKey=null)
     {
         if ($handle instanceof PDO){
             return new PDORepository($handle);
         }
 
         if ($handle instanceof Client){
-            return new RedisRepository($handle,$_SERVER['SERVER_NAME']);
+            return new RedisRepository($handle,$redisKey);
         }
 
         return false;
